@@ -114,6 +114,7 @@ async function autoReply () {
     },
     commentsFilterForHeldForReviewTab: {}
   }
+  if (ytcfg.data_.DELEGATED_SESSION_ID) obj.context.user['onBehalfOfUser'] =  ytcfg.data_.DELEGATED_SESSION_ID
   const json = await fetch(`https://studio.youtube.com/youtubei/v1/comment/get_comments?alt=json&key=${ytcfg.data_.INNERTUBE_API_KEY}`, {
     headers: {
       accept: '*/*',
@@ -191,6 +192,7 @@ async function replyComment (createReplyParams, userID, postLink) {
       }
     }
   }
+  if (ytcfg.data_.DELEGATED_SESSION_ID) obj.context.user['onBehalfOfUser'] =  ytcfg.data_.DELEGATED_SESSION_ID
   const json = await fetch(`https://studio.youtube.com/youtubei/v1/comment/create_comment_reply?alt=json&key=${ytcfg.data_.INNERTUBE_API_KEY}`, {
     headers: {
       accept: '*/*',
@@ -228,6 +230,7 @@ async function heartComment (heartID) {
     },
     actions: [heartID]
   }
+  if (ytcfg.data_.DELEGATED_SESSION_ID) obj.context.user['onBehalfOfUser'] =  ytcfg.data_.DELEGATED_SESSION_ID
   const json = await fetch(`https://studio.youtube.com/youtubei/v1/comment/perform_comment_action?alt=json&key=${ytcfg.data_.INNERTUBE_API_KEY}`, {
     headers: {
       accept: '*/*',
