@@ -12,6 +12,6 @@ sheetUrl.addEventListener('keyup', () => chrome.storage.local.set({ getSheetUrl:
 chrome.storage.local.get(['getContent', 'getDelayTime', 'getBlackList', 'getSheetUrl'], ({ getContent, getDelayTime, getBlackList, getSheetUrl }) => {
   content.value = getContent || ''
   sheetUrl.value = getSheetUrl || ''
-  blackList.value = getBlackList || 'fuck|pussy|\\b(shit|ass|cunt)\\b|asshole|bitch|dick|vagina|penis|whore|stupid|devil|goddamnit'
+  blackList.value = getBlackList || 'fuck|pussy|\\b(shit|ass|cunt)\\b|asshole|bitch|dick|vagina|penis|whore|stupid|devil|goddamnit|promo'
   delayTime.value = getDelayTime || 60
 })

@@ -1,5 +1,3 @@
-/* global chrome, alert, location, ytcfg */
-
 // 处理写入HTML的限制
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
   window.trustedTypes.createPolicy('default', {
@@ -120,7 +118,8 @@ async function autoReply () {
       accept: '*/*',
       'accept-language': 'zh-CN,zh;q=0.9',
       authorization: 'SAPISIDHASH ' + await getSApiSidHash(),
-      'content-type': 'application/json'
+      'content-type': 'application/json',
+      'x-goog-authuser': 1
     },
     body: JSON.stringify(obj),
     method: 'POST'
@@ -162,15 +161,22 @@ async function autoReply () {
  * @returns {string} 回复状态
  */
 async function replyComment (createReplyParams, userID, postLink) {
+  console.log('createReplyParams', createReplyParams)
+  console.log('userID', userID)
+  console.log('postLink', postLink)
   const init = await sendBackground(['init'])
   const contentList = init.getContent.split('\n')
+  const contentWithUrl = contentList.filter(x => x.includes('https'))
+  const contentWithoutUrl = contentList.filter(x => !x.includes('https'))
   let content
-  if (postLink.includes('watch')) {
+  if (postLink.includes('watch') && contentWithoutUrl.length) {
     // 视频
-    content = contentList.filter(x => !x.includes('https'))
-  } else if (postLink.includes('community')) {
+    content = contentWithoutUrl
+  } else if (postLink.includes('community') && contentWithUrl.length) {
     // 社区帖
-    content = contentList.filter(x => x.includes('https'))
+    content = contentWithUrl
+  } else {
+    content = contentList
   }
   // 格式化评论的内容
   const commentText = content[getRandom(0, content.length - 1)].replace(/@@@/g, userID).replace(/\\n/g, '\n')
@@ -198,7 +204,8 @@ async function replyComment (createReplyParams, userID, postLink) {
       accept: '*/*',
       'accept-language': 'zh-CN,zh;q=0.9',
       authorization: 'SAPISIDHASH ' + await getSApiSidHash(),
-      'content-type': 'application/json'
+      'content-type': 'application/json',
+      'x-goog-authuser': 1
     },
     body: JSON.stringify(obj),
     method: 'POST'
@@ -236,7 +243,8 @@ async function heartComment (heartID) {
       accept: '*/*',
       'accept-language': 'zh-CN,zh;q=0.9',
       authorization: 'SAPISIDHASH ' + await getSApiSidHash(),
-      'content-type': 'application/json'
+      'content-type': 'application/json',
+      'x-goog-authuser': 1
     },
     body: JSON.stringify(obj),
     method: 'POST'
