@@ -113,14 +113,15 @@ async function autoReply () {
     commentsFilterForHeldForReviewTab: {}
   }
   if (ytcfg.data_.DELEGATED_SESSION_ID) obj.context.user['onBehalfOfUser'] =  ytcfg.data_.DELEGATED_SESSION_ID
+  const headers = {
+    accept: '*/*',
+    'accept-language': 'zh-CN,zh;q=0.9',
+    authorization: 'SAPISIDHASH ' + await getSApiSidHash(),
+    'content-type': 'application/json'
+  }
+  if (ytcfg.data_.SIGNIN_URL.includes('authuser=1')) headers['x-goog-authuser'] = 1
   const json = await fetch(`https://studio.youtube.com/youtubei/v1/comment/get_comments?alt=json&key=${ytcfg.data_.INNERTUBE_API_KEY}`, {
-    headers: {
-      accept: '*/*',
-      'accept-language': 'zh-CN,zh;q=0.9',
-      authorization: 'SAPISIDHASH ' + await getSApiSidHash(),
-      'content-type': 'application/json',
-      'x-goog-authuser': 1
-    },
+    headers,
     body: JSON.stringify(obj),
     method: 'POST'
   }).then(response => response.json())
@@ -161,9 +162,6 @@ async function autoReply () {
  * @returns {string} 回复状态
  */
 async function replyComment (createReplyParams, userID, postLink) {
-  console.log('createReplyParams', createReplyParams)
-  console.log('userID', userID)
-  console.log('postLink', postLink)
   const init = await sendBackground(['init'])
   const contentList = init.getContent.split('\n')
   const contentWithUrl = contentList.filter(x => x.includes('https'))
@@ -199,14 +197,15 @@ async function replyComment (createReplyParams, userID, postLink) {
     }
   }
   if (ytcfg.data_.DELEGATED_SESSION_ID) obj.context.user['onBehalfOfUser'] =  ytcfg.data_.DELEGATED_SESSION_ID
+  const headers = {
+    accept: '*/*',
+    'accept-language': 'zh-CN,zh;q=0.9',
+    authorization: 'SAPISIDHASH ' + await getSApiSidHash(),
+    'content-type': 'application/json'
+  }
+  if (ytcfg.data_.SIGNIN_URL.includes('authuser=1')) headers['x-goog-authuser'] = 1
   const json = await fetch(`https://studio.youtube.com/youtubei/v1/comment/create_comment_reply?alt=json&key=${ytcfg.data_.INNERTUBE_API_KEY}`, {
-    headers: {
-      accept: '*/*',
-      'accept-language': 'zh-CN,zh;q=0.9',
-      authorization: 'SAPISIDHASH ' + await getSApiSidHash(),
-      'content-type': 'application/json',
-      'x-goog-authuser': 1
-    },
+    headers,
     body: JSON.stringify(obj),
     method: 'POST'
   }).then(response => response.json())
@@ -238,14 +237,15 @@ async function heartComment (heartID) {
     actions: [heartID]
   }
   if (ytcfg.data_.DELEGATED_SESSION_ID) obj.context.user['onBehalfOfUser'] =  ytcfg.data_.DELEGATED_SESSION_ID
+  const headers = {
+    accept: '*/*',
+    'accept-language': 'zh-CN,zh;q=0.9',
+    authorization: 'SAPISIDHASH ' + await getSApiSidHash(),
+    'content-type': 'application/json'
+  }
+  if (ytcfg.data_.SIGNIN_URL.includes('authuser=1')) headers['x-goog-authuser'] = 1
   const json = await fetch(`https://studio.youtube.com/youtubei/v1/comment/perform_comment_action?alt=json&key=${ytcfg.data_.INNERTUBE_API_KEY}`, {
-    headers: {
-      accept: '*/*',
-      'accept-language': 'zh-CN,zh;q=0.9',
-      authorization: 'SAPISIDHASH ' + await getSApiSidHash(),
-      'content-type': 'application/json',
-      'x-goog-authuser': 1
-    },
+    headers,
     body: JSON.stringify(obj),
     method: 'POST'
   }).then(response => response.json())
