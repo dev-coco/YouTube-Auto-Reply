@@ -1,4 +1,4 @@
-if (location.href.includes('comments/inbox')) {
+if (location.href.includes('comments/inbox') || location.href.includes('community?')) {
   const element = document.createElement('div')
   element.innerHTML = chrome.runtime.id
   element.id = 'YoutubeAutoReply'

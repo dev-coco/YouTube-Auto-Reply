@@ -1,6 +1,6 @@
 {
   "name": "YouTube 自动回复",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "author": "Raz1ner",
   "manifest_version": 3,
   "description": "YouTube 自动回复",
@@ -19,19 +19,17 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://studio.youtube.com/*"],
+      "matches": ["*://*.youtube.com/*"],
       "js": ["inject.js"]
     }
   ],
   "externally_connectable": {
-    "matches": ["https://studio.youtube.com/*"]
+    "matches": ["https://*.youtube.com/*"]
   },
-  "web_accessible_resources": [
-    {
-      "resources": ["myScript.js"],
-      "matches": ["*://studio.youtube.com/*"]
-    }
-  ],
+  "web_accessible_resources": [{
+    "resources": ["myScript.js"],
+    "matches": ["*://*.youtube.com/*"]
+  }],
   "permissions": ["storage"],
-  "host_permissions": ["*://studio.youtube.com/*", "https://script.google.com/macros/*"]
+  "host_permissions": ["*://*.youtube.com/*", "https://script.google.com/macros/*"]
 }
