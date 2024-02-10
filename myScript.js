@@ -98,6 +98,7 @@ async function getSApiSidHash () {
     })
   }
   const timestamp = Date.now()
+  // const SAPISID = document.cookie.split('SAPISID=').pop().split('; ')[0]
   const SAPISID = document.cookie.split('SAPISID=')[1].split('; ')[0]
   const digest = await sha1(`${timestamp} ${SAPISID} ${location.origin}`)
   return `${timestamp}_${digest}`
@@ -183,8 +184,9 @@ async function autoReply () {
   }
   autoReply()
 }
-
+// CAUQBxoaVWd6X2w3Q0VzVTdpZEhSNDg4UjRBYUFCQWcwADgAShUxMDg4NjM1NDk0OTI0Mzk0MTExMzOoAQGyASRVZ2t4aXMzQUFwaVJQb2s2NE53TVN5cUFJVElvMWtYTkd6eDi6ARhVQ2dVdGtBU2ZvcjFaWXRobjZnX0QtQkHwAQA%3D
 // 社区帖自动回复
+let isAdmin = true
 async function communityAutoReply () {
   if (!process) return
   // 获取配置
@@ -197,22 +199,31 @@ async function communityAutoReply () {
   const blackListRegex = new RegExp(blackList.replace(/,/g, '|'), 'gi')
   const data = ytInitialData.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[1].itemSectionRenderer.contents
   for (let i = 0; i < data.length - 1; i++) {
+    console.log(1)
     const info = data[i].commentThreadRenderer.comment.commentRenderer
     const userID = info.authorText.simpleText
     const content = info.contentText.runs.map(x => x.text).join('')
     const replyID = info.actionButtons.commentActionButtonsRenderer.replyButton.buttonRenderer.navigationEndpoint.createCommentReplyDialogEndpoint.dialog.commentReplyDialogRenderer.replyButton.buttonRenderer.serviceEndpoint.createCommentReplyEndpoint.createReplyParams
-    const heartID = info.actionButtons.commentActionButtonsRenderer.creatorHeart.creatorHeartRenderer.heartEndpoint.performCommentActionEndpoint.action
+    let heartID, heartStatus
+    try {
+      // 仅限管理员
+      heartID = info.actionButtons.commentActionButtonsRenderer.creatorHeart.creatorHeartRenderer.heartEndpoint.performCommentActionEndpoint.action
+      heartStatus = info.actionButtons.commentActionButtonsRenderer.creatorHeart.creatorHeartRenderer.isHearted
+    } catch {
+      isAdmin = false
+    }
+    const likeID = info.actionButtons.commentActionButtonsRenderer.likeButton.toggleButtonRenderer.defaultServiceEndpoint.performCommentActionEndpoint.action
     const postLink = location.href
-    const heartStatus = info.actionButtons.commentActionButtonsRenderer.creatorHeart.creatorHeartRenderer.isHearted
+    const likeStatus = info.actionButtons.commentActionButtonsRenderer.likeButton.toggleButtonRenderer.isToggled
     const replyStatus = info.replyCount
     // 黑名单和重复跳过
-    if (blackListRegex.test(content) || heartStatus || replyStatus) {
+    if (blackListRegex.test(content) || heartStatus || replyStatus || likeStatus) {
       bypassCount++
       continue
     }
     if (database[userID]) {
       // 重复只点赞
-      await heartComment(heartID)
+      isAdmin ? await heartComment(heartID) : await likeComment(likeID)
       likeCount++
     } else {
       await replyComment(replyID, userID, postLink)
@@ -325,5 +336,45 @@ async function heartComment (heartID) {
     method: 'POST'
   }).then(response => response.json())
   // console.log('heartComment', json)
+  return 'success'
+}
+
+/**
+ * @description 点赞
+ * @param {string} heartID - 点赞ID
+ * @returns {string} 点赞状态
+ */
+async function likeComment (likeID) {
+  const obj = {
+    context: {
+      client: {
+        clientName: ytcfg.data_.INNERTUBE_CONTEXT_CLIENT_NAME,
+        clientVersion: ytcfg.data_.INNERTUBE_CLIENT_VERSION
+      },
+      user: {
+        delegationContext: {
+          externalChannelId: ytcfg.data_.CHANNEL_ID,
+          roleType: {
+            channelRoleType: 'CREATOR_CHANNEL_ROLE_TYPE_OWNER'
+          }
+        }
+      }
+    },
+    actions: [likeID]
+  }
+  if (ytcfg.data_.DELEGATED_SESSION_ID) obj.context.user['onBehalfOfUser'] =  ytcfg.data_.DELEGATED_SESSION_ID
+  const headers = {
+    accept: '*/*',
+    'accept-language': 'zh-CN,zh;q=0.9',
+    authorization: 'SAPISIDHASH ' + await getSApiSidHash(),
+    'content-type': 'application/json',
+  }
+  if (ytcfg.data_.SIGNIN_URL.includes('authuser=1')) headers['x-goog-authuser'] = 1
+  const json = await fetch(`/youtubei/v1/comment/perform_comment_action?prettyPrint=false&key=${ytcfg.data_.INNERTUBE_API_KEY}`, {
+    headers,
+    body: JSON.stringify(obj),
+    method: 'POST'
+  }).then(response => response.json())
+  // console.log('likeComment', json)
   return 'success'
 }
